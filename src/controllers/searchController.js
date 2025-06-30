@@ -37,8 +37,7 @@ const getSearchSuggestions = async (req, res) => {
 
         // chercher si la clé existe dans ma basde redis => client.get(key)
         // si elle existe => return en json la valeur de cette clé
-        // sinon, faire la requête à la base de données
-        //stocker a données retournée (depuis Prisma/Postgre) en cache dans redis
+
 
         const suggestions = await prisma.product.findMany({
             where: {
