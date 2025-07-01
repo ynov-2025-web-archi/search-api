@@ -30,14 +30,17 @@ const getSearchSuggestions = async (req, res) => {
         }
 
         const searchQuery = query.trim();
-
-        // créer key : `search:${searchQuery}:${limit}`
-        // => search_product:5
-        // => search_product_a:5
-
-        // chercher si la clé existe dans ma basde redis => client.get(key)
-        // si elle existe => return en json la valeur de cette clé
-
+        const key = `search:${searchQuery}:${limit}`;
+        const cachedSuggestions = await client.get(key);
+        if (cachedSuggestions) {
+            console.log('Search suggestions from cache:', JSON.parse(cachedSuggestions));
+            return res.json({
+                success: true,
+                data: {
+                    suggestions: JSON.parse(cachedSuggestions)
+                }
+            });
+        }
 
         const suggestions = await prisma.product.findMany({
             where: {
@@ -61,7 +64,7 @@ const getSearchSuggestions = async (req, res) => {
             type: 'product'
         }));
 
-        await client.set(`search:${searchQuery}:${limit}`, JSON.stringify(formattedSuggestions));
+        await client.set(key, JSON.stringify(formattedSuggestions));
 
         console.log('Search suggestions:', formattedSuggestions);
 
